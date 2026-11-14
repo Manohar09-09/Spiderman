@@ -1,0 +1,5 @@
+package com.spidy.servlet;
+import com.spidy.util.*;import jakarta.servlet.annotation.*;import jakarta.servlet.http.*;import java.io.*;import java.sql.*;
+@WebServlet("/admin-login") public class AdminLoginServlet extends HttpServlet{protected void doPost(HttpServletRequest r,HttpServletResponse p)throws IOException{
+ try(Connection c=DBConnection.getConnection();PreparedStatement s=c.prepareStatement("SELECT id,username FROM admins WHERE username=? AND password=?")){s.setString(1,r.getParameter("username"));s.setString(2,PasswordUtil.hash(r.getParameter("password")));ResultSet z=s.executeQuery();if(z.next()){if(r.getSession(false)!=null)r.getSession(false).invalidate();HttpSession h=r.getSession();h.setAttribute("adminId",z.getInt(1));h.setAttribute("adminName",z.getString(2));getServletContext().setAttribute("appName","Spidy");p.sendRedirect("admin-dashboard.jsp");}else{r.getSession().setAttribute("msg","Invalid admin login.");p.sendRedirect("admin-login.jsp");}}
+ catch(Exception e){r.getSession().setAttribute("msg",e.getMessage());p.sendRedirect("admin-login.jsp");}}}
